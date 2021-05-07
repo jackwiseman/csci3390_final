@@ -34,7 +34,7 @@ object main{
     val startTimeMillis = System.currentTimeMillis()
     val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , 1)} )
     val g = Graph.fromEdges[Int, (Int, Int)](edges, (1, r.nextInt(2), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
-    
+    val graph = g.mapVertices((id, attr) => (1, r.nextInt(2)))
     // functions are called here, passing input graph g and returning g_out
 
 
