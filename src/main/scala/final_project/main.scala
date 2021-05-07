@@ -24,6 +24,8 @@ object main{
     val spark = SparkSession.builder.config(conf).getOrCreate()
     /* You can either use sc or spark */
 
+    val r = scala.util.Random
+
     if(args.length != 2) {
       println("Usage: [path_to_graph] [output_path]")
       sys.exit(1)
@@ -31,7 +33,7 @@ object main{
 
     val startTimeMillis = System.currentTimeMillis()
     val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , 1)} )
-    val g = Graph.fromEdges[Int, Int](edges, 0, edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
+    val g = Graph.fromEdges[Int, (Int, Int)](edges, (1, r.nextInt(2), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
     
     // functions are called here, passing input graph g and returning g_out
 
