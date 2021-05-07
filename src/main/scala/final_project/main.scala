@@ -15,6 +15,12 @@ object main{
 
   Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
   Logger.getLogger("org.spark-project").setLevel(Level.WARN)
+  
+  def filterGraph(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+    //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
+    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == 1)
+    return g_out
+}
 
 
   def main(args: Array[String]) {
@@ -34,7 +40,7 @@ object main{
     val startTimeMillis = System.currentTimeMillis()
     val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , 1)} )
     val g = Graph.fromEdges[Int, (Int, Int)](edges, (1, r.nextInt(2), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
-    val graph = g.mapVertices((id, attr) => (1, r.nextInt(2)))
+    val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
     // functions are called here, passing input graph g and returning g_out
 
 
