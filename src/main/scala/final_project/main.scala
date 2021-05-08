@@ -39,8 +39,8 @@ object main{
       val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
       //Send back message to source, so that each node has sent and arbitrarily collected if it can
         triplet => {
-          triplet.sendToDst((triplet.srcAttr._1, 1))
-          triplet.sendToSrc((triplet.dstAttr._1, 1))
+          if(triplet.srcId.toInt == triplet.dstAttr._1) {triplet.sendToSrc(triplet.dstId.toInt, 1)}
+          if(triplet.dstId.toInt == triplet.srcAttr._1) {triplet.sendToDst(triplet.srcId.toInt, 1)}
         }, (a, b) =>
           if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
