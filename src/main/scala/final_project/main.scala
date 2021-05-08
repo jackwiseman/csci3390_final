@@ -40,7 +40,11 @@ object main{
       //Adds the random 0s and 1s to each node. Of the form (VertexID, ((DstId, random number), counter))
 
       val newMsg = mappedGraph.aggregateMessages[((Int, Int), Int)] (
-         //returns vertices in the following form ((DstID, 1/-1 representing whether it is active or not), counter)
+        //returns vertices in the following form ((DstID, 1/-1 representing whether it is active or not), counter)
+        //returns vertices in the following form ((DstID, 1/-1 representing whether it is active or not), counter)
+        //srcAttr._1._1 = Correct DstID
+        //srcAttr._1._2 = random number 0/1
+        //srcAttr._2 = counter
          triplet => {
               if (triplet.dstId.toInt == triplet.srcAttr._1._1 && triplet.dstAttr._2 != triplet.srcAttr._2) {triplet.sendToDst((triplet.srcId.toInt,1), 1)}
               triplet.sendToSrc((-1,-1), -1)
