@@ -22,16 +22,17 @@ object main{
     return g_out
 }
 
-  def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) {
+   def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
     val r = scala.util.Random
     val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
-    val msg: VertexRDD[(Int, Int)] = g.aggregateMessages[(Int, Int)] (
+    val msg: VertexRDD[(Int, Int)] = graph.aggregateMessages[(Int, Int)] (
       triplet => {
-        triplet.sendToDst(triplet.srcAttr._1, 1)
-      }, (a, b)) => {
-        if (r.nextLong() > a._1.toLong / (a._1.toLong + b._1.toLong)) (a._1, a._2 + b._2) else (b._1, b._2 + a._2)
-      })
-    g.vertices.foreach(println)
+        triplet.sendToDst((triplet.srcId.toInt, 1))
+        triplet.sendToSrc((triplet.dstId.toInt, 1))
+      }, (a, b) => 
+        if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) (a._1, (a._2 + b._2)) else (b._1, b._2 + a._2)
+      )
+    for(element<-msg) {println(element)}
   }
 
   def main(args: Array[String]) {
