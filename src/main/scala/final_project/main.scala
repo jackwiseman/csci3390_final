@@ -23,6 +23,37 @@ object main{
 }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
+      val msg = graph.aggregateMessages[(Int, Int)] (
+        triplet => {
+        triplet.sendToDst((triplet.srcId.toInt, 1))
+        triplet.sendToSrc((triplet.dstId.toInt, 1))
+       }, (a, b) => 
+        if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
+      )
+
+  val joinedGraph: Graph[(Int, Int), (Long, Long)] = g.joinVertices(msg) { (_, oldAttr, newAttr) => (newAttr._1, 1)}
+
+  val newMsg = joinedGraph.aggregateMessages[(Int, Int)] (
+      triplet => {
+          if (triplet.dstId == triplet.srcAttr._1){triplet.sendToDst((triplet.srcId.toInt,1))}
+          if (triplet.srcId == triplet.dstAttr._1){triplet.sendToSrc((triplet.dstId.toInt,1))}
+      },(a, b) => 
+        if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
+    )
+
+  val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(newMsg) { (_, oldAttr, newAttr) => (newAttr._1, 1)}
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
     val r = scala.util.Random
     val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
     val msg: VertexRDD[(Int, Int)] = graph.aggregateMessages[(Int, Int)] (
@@ -47,6 +78,7 @@ object main{
     if(args.length != 2) {
       println("Usage: [path_to_graph] [output_path]")
       sys.exit(1)
+      
     }
 
     val startTimeMillis = System.currentTimeMillis()
