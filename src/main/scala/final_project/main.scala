@@ -18,36 +18,43 @@ object main{
   
   def filterGraph(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
-    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == 1)
+    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
     return g_out
-}
+  }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
-      val msg = graph.aggregateMessages[(Int, Int)] (
-      triplet => {
-        triplet.sendToDst((triplet.srcId.toInt, 1))
-        triplet.sendToSrc((triplet.dstId.toInt, 1))
-      }, (a, b) => 
-        if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
+      val msg = g.aggregateMessages[(Int, Int)] (
+     //creates vertices for the new graph. 
+        triplet => {
+           triplet.sendToDst((triplet.srcId.toInt, 1))
+            triplet.sendToSrc((triplet.dstId.toInt, 1))
+        }, (a, b) => 
+            if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
+    
+      val joinedGraph: Graph[(Int, Int), (Long, Long)] = g.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
-      val joinedGraph: Graph[(Int, Int), (Long, Long)] = g.joinVertices(msg) { (_, oldAttr, newAttr) => (newAttr._1, 1)}
+      //Joins with the original graph, completing the message sending phase.
 
-      val newMsg = joinedGraph.aggregateMessages[(Int, Int)] (
+      val mappedGraph: Graph[((Int, Int), Int), (Long, Long)] = joinedGraph.mapVertices((a,b) => (b, 1))
+      //Adds the random 0s and 1s to each node. Of the form (VertexID, ((DstId, random number), counter))
+
+      val newMsg = mappedGraph.aggregateMessages[((Int, Int), Int)] (
+         //returns vertices in the following form ((DstID, 1/-1 representing whether it is active or not), counter)
          triplet => {
-            if (triplet.dstId.toInt == triplet.srcAttr._1){triplet.sendToDst((triplet.srcId.toInt,1))}
-            else {(triplet.sendToSrc((-1,-1)))}
-            if (triplet.srcId.toInt == triplet.dstAttr._1){triplet.sendToSrc((triplet.dstId.toInt,1))}
-            else {(triplet.sendToSrc((-1,-1)))}
-         },(a, b) => 
-           if (a._1 == -1) {b}
-           else if (b._1 == -1) {a}
-           else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} 
-           else {(b._1, b._2 + a._2)}
+              if (triplet.dstId.toInt == triplet.srcAttr._1._1 && triplet.dstAttr._2 != triplet.srcAttr._2) {triplet.sendToDst((triplet.srcId.toInt,1), 1)}
+              triplet.sendToSrc((-1,-1), -1)
+          },(a, b) => 
+            if (a._2 == -1) {b}
+            else if (b._2 == -1) {a}
+            else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {((a._1._1, 1), a._2 + b._2)} 
+            else {((b._1._1, 1), a._2 + b._2)}
       )
 
-     val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(newMsg) { (_, oldAttr, newAttr) => (newAttr._1, newAttr._2)}
-   }
+    val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(newMsg) { (_, oldAttr, newAttr) => (newAttr._1._1, newAttr._1._2)}
+
+    val finalGraph = filterGraph(joinedGraph2)
+ }
 
   def main(args: Array[String]) {
 
