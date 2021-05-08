@@ -36,6 +36,16 @@ object main{
 
       //Joins with the original graph, completing the message sending phase.
 
+      val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
+      //Send back message to source, so that each node has sent and arbitrarily collected if it can
+        triplet => {
+          triplet.sendToDst((triplet.srcAttr._1, 1))
+          triplet.sendToSrc((triplet.dstAttr._1, 1))
+        }, (a, b) =>
+          if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
+      )
+
+
       val mappedGraph: Graph[((Int, Int), Int), (Long, Long)] = joinedGraph.mapVertices((a,b) => (b, 1))
       //Adds the random 0s and 1s to each node. Of the form (VertexID, ((DstId, random number), counter))
 
