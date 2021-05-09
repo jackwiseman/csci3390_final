@@ -65,7 +65,7 @@ object main{
         else {
           triplet.sendToSrc((-1, -1))
           triplet.sendToDst((-1, -1))
-        }}, (a, b) => if(a._1 > b._1) a._1 else b._1
+        }}, (a, b) => if(a._1 > b._1) a else b
     )
 
     joinedGraph.vertices.collect
