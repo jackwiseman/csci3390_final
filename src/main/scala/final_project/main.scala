@@ -65,18 +65,23 @@ object main{
       triplet => {
         if (triplet.dstAttr._1 == triplet.srcId.toInt && triplet.dstAttr._2 == 1 && triplet.srcAttr._2 == 0) {
           triplet.sendToSrc((triplet.dstId.toInt))
-          triplet.sendToDst((triplet.srcId.toInt))
+          triplet.sendToDst((0))
         }
         else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.dstAttr._2 == 0) {
           triplet.sendToSrc((triplet.dstId.toInt))
-          triplet.sendToDst((triplet.srcId.toInt))
+          triplet.sendToDst((0))
         }
         else {
           triplet.sendToSrc((-1))
           triplet.sendToDst((-1))
         }}, (a, b) => if(a > b) a else b
-    )  
-  
+    )
+      
+    val newEdges = M.vertices.map(v=>
+                       if(v._1 == 0 || v._2._1 == 0){(0,0)}
+                       else{(v._1, v._2._1)}
+                       )
+ 
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
     M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
@@ -123,3 +128,9 @@ object main{
     sys.exit(1)
   }
 }
+
+
+
+
+
+
