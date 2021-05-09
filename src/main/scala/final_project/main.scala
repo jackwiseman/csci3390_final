@@ -57,7 +57,7 @@ object main{
           triplet.sendToSrc((1))
           triplet.sendToDst((1))
         }
-        else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.srcAttr._2 == 0) {
+        else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.dstAttr._2 == 0) {
           triplet.sendToSrc((1))
           triplet.sendToDst((1))
         }
@@ -67,7 +67,7 @@ object main{
         }}, (a, b) => if(a > b) a else b
     )  
   
-    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr)}
+    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
 
 
    }
