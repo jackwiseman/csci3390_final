@@ -23,10 +23,13 @@ object main{
   }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
-     var remaining_edges= 2 
-     while (remaining_edges >= 1){
+    val r = scala.util.Random
+    var remaining_edges= 2 
+
+    while (remaining_edges >= 1){
+      println("Look ma, we made it!")
       val msg = g.aggregateMessages[(Int, Int)] (
-     //creates vertices for the new graph. 
+      //creates vertices for the new graph. 
         triplet => {
            triplet.sendToDst((triplet.srcId.toInt, 1))
             triplet.sendToSrc((triplet.dstId.toInt, 1))
@@ -35,10 +38,9 @@ object main{
       )
     
       val joinedGraph: Graph[(Int, Int), (Long, Long)] = g.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
-
       //Joins with the original graph, completing the message sending phase.
 
-       val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
+      val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
       //Send back message to source, so that each node has sent and arbitrarily collected if it can
         triplet => {
           if(triplet.srcId.toInt == triplet.dstAttr._1) {triplet.sendToSrc(triplet.dstId.toInt, 1)} else {triplet.sendToDst(-1, 1)}
@@ -77,7 +79,6 @@ object main{
     val conf = new SparkConf().setAppName("final_project")
     val sc = new SparkContext(conf)
     val spark = SparkSession.builder.config(conf).getOrCreate()
-    /* You can either use sc or spark */
 
     val r = scala.util.Random
 
@@ -88,11 +89,14 @@ object main{
     }
 
     val startTimeMillis = System.currentTimeMillis()
-    val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , 1)} )
-    val g = Graph.fromEdges[Int, (Int, Int)](edges, (1, r.nextInt(2), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
-    val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
-    // functions are called here, passing input graph g and returning g_out
+    val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , (1L, 1L))} )
 
+    val g = Graph.fromEdges[(Int, Int), (Long, Long)](edges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
+//    val graph = g.mapVertices(
+    //val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
+    // functions are called here, passing input graph g and returning g_out
+    
+    val g_out = IsraeliItai(g)
 
     val endTimeMillis = System.currentTimeMillis()
     val durationSeconds = (endTimeMillis - startTimeMillis) / 1000
