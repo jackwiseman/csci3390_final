@@ -84,7 +84,7 @@ object main{
     M.vertices.collect
     graph.vertices.collect
       
-    remaining_edges = joinedGraph2.edges.count.asInstanceOf[Int]
+    remaining_edges = graph.edges.count.asInstanceOf[Int]
    }
  }
   def main(args: Array[String]) {
