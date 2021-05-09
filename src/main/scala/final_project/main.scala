@@ -23,6 +23,8 @@ object main{
   }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
+     var remaining_edges= 2 
+     while (remaining_edges >= 1){
       val msg = g.aggregateMessages[(Int, Int)] (
      //creates vertices for the new graph. 
         triplet => {
@@ -52,6 +54,7 @@ object main{
 
     joinedGraph.vertices.collect
     joinedGraph2.vertices.collect
+   }
  }
   def main(args: Array[String]) {
 
