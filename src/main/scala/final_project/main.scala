@@ -18,19 +18,18 @@ object main{
   
   def filterGraph(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
-    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
+    var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
     return g_out
   }
   
    def mFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
-    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
+    var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
     return g_out
    }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
      var remaining_edges= 2 
-    
      while (remaining_edges >= 1){
       val msg = g.aggregateMessages[(Int, Int)] (
      //creates vertices for the new graph. 
@@ -45,7 +44,7 @@ object main{
 
       //Joins with the original graph, completing the message sending phase.
 
-       val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
+      val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
       //Send back message to source, so that each node has sent and arbitrarily collected if it can
         triplet => {
           if(triplet.srcId.toInt == triplet.dstAttr._1) {triplet.sendToSrc(triplet.dstId.toInt, 1)} else {triplet.sendToDst(-1, 1)}
@@ -76,8 +75,10 @@ object main{
   
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
-    M = mFilter(joinedGraph3)
+    M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
     g = filterGraph(joinedGraph3)
+    M.vertices.collect
+    g.vertices.collect
 
 
    }
