@@ -50,6 +50,22 @@ object main{
 
     val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
+    val anotherMessage = joinedGraph2.aggregateMessages[(Int, Int)] (
+      triplet => {
+        if (triplet.dstAttr._1 == triplet.srcId.toInt && triplet.dstAttr._2 == 1 && triplet.srcAttr._2 == 0) {
+          triplet.sendToSrc((1, 1))
+          triplet.sendToDst((1, 1))
+        }
+        else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.srcAttr._2 == 0) {
+          triplet.sendToSrc((1, 1))
+          triplet.sendToDst((1, 1))
+        }
+        else {
+          triplet.sendToSrc((-1, -1))
+          triplet.sendToDst((-1, -1))
+        }}, (a, b) => if(a > b) a else b
+    )
+
     joinedGraph.vertices.collect
     joinedGraph2.vertices.collect
  }
