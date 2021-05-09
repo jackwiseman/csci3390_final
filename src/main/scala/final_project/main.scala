@@ -28,14 +28,13 @@ object main{
     return g_out
    }
 
-   def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
+   def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     val r = scala.util.Random
-    var remaining_edges: Long = 2
+    var remaining_edges: Long = 2L
     var M = filterGraph(g)
     var graph = g
 
-    while (remaining_edges >= 1){
-      println("Look ma, we made it!")
+    while (remaining_edges >= 1L){
       val msg = graph.aggregateMessages[(Int, Int)] (
       //creates vertices for the new graph. 
         triplet => {
@@ -58,34 +57,36 @@ object main{
         else if (b._1 == -1) {a}
         else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
-
     val joinedGraph2: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
     val anotherMessage = joinedGraph2.aggregateMessages[Int] (
       triplet => {
         if (triplet.dstAttr._1 == triplet.srcId.toInt && triplet.dstAttr._2 == 1 && triplet.srcAttr._2 == 0) {
-          triplet.sendToSrc((1))
-          triplet.sendToDst((1))
+          triplet.sendToSrc(1)
+          triplet.sendToDst(1)
         }
         else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.dstAttr._2 == 0) {
-          triplet.sendToSrc((1))
-          triplet.sendToDst((1))
+          triplet.sendToSrc(1)
+          triplet.sendToDst(1)
         }
         else {
-          triplet.sendToSrc((-1))
-          triplet.sendToDst((-1))
+          triplet.sendToSrc(-1)
+          triplet.sendToDst(-1)
         }}, (a, b) => if(a > b) a else b
-    )  
-  
+    ) 
+    joinedGraph2.vertices.foreach(println) 
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
     M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
+    M.edges.foreach(println)
+    graph.edges.foreach(println)
     graph = filterGraph(joinedGraph3)
     M.vertices.collect
     graph.vertices.collect
       
-    remaining_edges = graph.numEdges
+    remaining_edges = graph.numEdges.toLong
    }
+   return M
  }
   def main(args: Array[String]) {
 
@@ -105,9 +106,6 @@ object main{
     val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , (1L, 1L))} )
 
     val g = Graph.fromEdges[(Int, Int), (Long, Long)](edges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
-//    val graph = g.mapVertices(
-    //val graph = g.mapVertices((active, randNum) => (1, r.nextInt(2)))
-    // functions are called here, passing input graph g and returning g_out
     
     val g_out = IsraeliItai(g)
 
@@ -117,9 +115,10 @@ object main{
     println("Runtime: " + durationSeconds + "s.")
     println("==================================")
     
-    // uncomment the following lines out when g_out is assigned
-    // val g2df = spark.createDataFrame(g_out.vertices)
-    // g2df.coalesce(1).write.format("csv").mode("overwrite").save(args(1))
+    var g2df = spark.createDataFrame(g_out.vertices)
+    g2df = g2df.drop(g2df.columns.last)
+
+    g2df.coalesce(1).write.format("csv").mode("overwrite").save(args(1))
     sys.exit(1)
   }
 }
