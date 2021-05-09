@@ -77,7 +77,7 @@ object main{
   
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
-    M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
+    M = Graph(mFilter(joinedGraph3).vertices, mFilter(joinedGraph3).edges)
     g = filterGraph(joinedGraph3)
     M.vertices.collect
     g.vertices.collect
