@@ -31,6 +31,7 @@ object main{
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
     val r = scala.util.Random
     var remaining_edges= 2 
+    var M = mFilter(g)
 
     while (remaining_edges >= 1){
       println("Look ma, we made it!")
@@ -77,7 +78,7 @@ object main{
   
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
-    M = Graph(mFilter(joinedGraph3).vertices, mFilter(joinedGraph3).edges)
+    M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
     g = filterGraph(joinedGraph3)
     M.vertices.collect
     g.vertices.collect
