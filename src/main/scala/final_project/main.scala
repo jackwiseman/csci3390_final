@@ -83,8 +83,6 @@ object main{
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
     M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
-    M.edges.foreach(println)
-    graph.edges.foreach(println)
     graph = filterGraph(joinedGraph3)
     M.vertices.collect
     graph.vertices.collect
@@ -120,9 +118,9 @@ object main{
     println("Runtime: " + durationSeconds + "s.")
     println("==================================")
     
-    var g2df = spark.createDataFrame(g_out.vertices)
+    g_out.edges.foreach(println)
+    var g2df = spark.createDataFrame(g_out.edges)
     g2df = g2df.drop(g2df.columns.last)
-
     g2df.coalesce(1).write.format("csv").mode("overwrite").save(args(1))
     sys.exit(1)
   }
