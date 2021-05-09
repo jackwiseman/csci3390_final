@@ -64,12 +64,12 @@ object main{
     val anotherMessage = joinedGraph2.aggregateMessages[Int] (
       triplet => {
         if (triplet.dstAttr._1 == triplet.srcId.toInt && triplet.dstAttr._2 == 1 && triplet.srcAttr._2 == 0) {
-          triplet.sendToSrc((1))
-          triplet.sendToDst((1))
+          triplet.sendToSrc((triplet.dstId.toInt))
+          triplet.sendToDst((triplet.srcId.toInt))
         }
         else if (triplet.srcAttr._1 == triplet.dstId.toInt && triplet.srcAttr._2 == 1 && triplet.dstAttr._2 == 0) {
-          triplet.sendToSrc((1))
-          triplet.sendToDst((1))
+          triplet.sendToSrc((triplet.dstId.toInt))
+          triplet.sendToDst((triplet.srcId.toInt))
         }
         else {
           triplet.sendToSrc((-1))
