@@ -30,7 +30,7 @@ object main{
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
     val r = scala.util.Random
-    var remaining_edges= 2 
+    var remaining_edges: Long = 2
     var M = filterGraph(g)
     var graph = g
 
@@ -84,7 +84,7 @@ object main{
     M.vertices.collect
     graph.vertices.collect
       
-    remaining_edges = graph.edges.count.asInstanceOf[Int]
+    remaining_edges = graph.numEdges
    }
  }
   def main(args: Array[String]) {
