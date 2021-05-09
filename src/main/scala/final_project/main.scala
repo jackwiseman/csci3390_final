@@ -21,9 +21,16 @@ object main{
     val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
     return g_out
   }
+  
+   def mFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+    //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
+    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
+    return g_out
+   }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
      var remaining_edges= 2 
+    
      while (remaining_edges >= 1){
       val msg = g.aggregateMessages[(Int, Int)] (
      //creates vertices for the new graph. 
@@ -68,6 +75,9 @@ object main{
     )  
   
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
+       
+    M = mFilter(joinedGraph3)
+    g = filterGraph(joinedGraph3)
 
 
    }
