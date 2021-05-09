@@ -49,7 +49,6 @@ object main{
         else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
 
-
     val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
     val anotherMessage = joinedGraph2.aggregateMessages[(Int, Int)] (
@@ -67,9 +66,6 @@ object main{
           triplet.sendToDst((-1, -1))
         }}, (a, b) => if(a._1 > b._1) a else b
     )
-
-    joinedGraph.vertices.collect
-    joinedGraph2.vertices.collect
    }
  }
   def main(args: Array[String]) {
