@@ -31,7 +31,7 @@ object main{
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
     val r = scala.util.Random
     var remaining_edges= 2 
-    var M = mFilter(g)
+    var M = filterGraph(g)
     var graph = g
 
     while (remaining_edges >= 1){
