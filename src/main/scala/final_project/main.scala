@@ -82,8 +82,6 @@ object main{
     g = filterGraph(joinedGraph3)
     M.vertices.collect
     g.vertices.collect
-
-
    }
  }
   def main(args: Array[String]) {
