@@ -32,10 +32,11 @@ object main{
     val r = scala.util.Random
     var remaining_edges= 2 
     var M = mFilter(g)
+    var graph = g
 
     while (remaining_edges >= 1){
       println("Look ma, we made it!")
-      val msg = g.aggregateMessages[(Int, Int)] (
+      val msg = graph.aggregateMessages[(Int, Int)] (
       //creates vertices for the new graph. 
         triplet => {
            triplet.sendToDst((triplet.srcId.toInt, 1))
@@ -44,7 +45,7 @@ object main{
             if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
     
-      val joinedGraph: Graph[(Int, Int), (Long, Long)] = g.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
+      val joinedGraph: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
       //Joins with the original graph, completing the message sending phase.
 
       val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
@@ -58,7 +59,7 @@ object main{
         else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
 
-    val joinedGraph2: Graph[(Int, Int), (Long, Long)] = g.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
+    val joinedGraph2: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
     val anotherMessage = joinedGraph2.aggregateMessages[Int] (
       triplet => {
@@ -76,12 +77,14 @@ object main{
         }}, (a, b) => if(a > b) a else b
     )  
   
-    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
+    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
        
     M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
-    g = filterGraph(joinedGraph3)
+    graph = filterGraph(joinedGraph3)
     M.vertices.collect
-    g.vertices.collect
+    graph.vertices.collect
+      
+    remaining_edges = joinedGraph2.edges.count.asInstanceOf[Int]
    }
  }
   def main(args: Array[String]) {
