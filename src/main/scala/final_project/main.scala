@@ -66,6 +66,10 @@ object main{
           triplet.sendToDst((-1))
         }}, (a, b) => if(a > b) a else b
     )  
+  
+    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr)}
+
+
    }
  }
   def main(args: Array[String]) {
