@@ -18,9 +18,15 @@ object main{
   
   def filterGraph(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
-    val g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
+    var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
     return g_out
   }
+  
+   def mFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+    //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
+    var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
+    return g_out
+   }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]) = {
     val r = scala.util.Random
@@ -70,6 +76,11 @@ object main{
     )  
   
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = g.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
+       
+    M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
+    g = filterGraph(joinedGraph3)
+    M.vertices.collect
+    g.vertices.collect
 
 
    }
