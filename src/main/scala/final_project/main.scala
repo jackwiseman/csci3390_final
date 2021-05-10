@@ -16,28 +16,28 @@ object main{
   Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
   Logger.getLogger("org.spark-project").setLevel(Level.WARN)
   
-  def filterGraph(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+  def filterGraph(g_in: Graph[(Int, Int), Int]): Graph[(Int, Int), Int] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
     var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 == -1)
     return g_out
   }
   
-   def mFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+   def mFilter(g_in: Graph[(Int, Int), Int]): Graph[(Int, Int), Int] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
     var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
     return g_out
    }
   
-   def testFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+   def testFilter(g_in: Graph[(Int, Int), Int]): Graph[(Int, Int), Int] = {
     //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
     var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1 && randNum._1 != 0)
     return g_out
    }
 
-   def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+   def IsraeliItai(g: Graph[(Int, Int), Int]): EdgeRDD[Int] = {
     val r = scala.util.Random
     var remaining_edges: Long = 2L
-    var M = filterGraph(g)
+    var M = filterGraph(g).edges
     var graph = g
 
     while (remaining_edges >= 1L){
@@ -50,7 +50,7 @@ object main{
             if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
     
-      val joinedGraph: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
+      val joinedGraph: Graph[(Int, Int), Int] = graph.joinVertices(msg) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
       //Joins with the original graph, completing the message sending phase.
 
       val returnMessage = joinedGraph.aggregateMessages[(Int, Int)] (
@@ -63,7 +63,7 @@ object main{
         else if (b._1 == -1) {a}
         else if (r.nextFloat() > a._2.toFloat / (a._2.toFloat + b._2.toFloat)) {(a._1, (a._2 + b._2))} else {(b._1, b._2 + a._2)}
       )
-    val joinedGraph2: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
+    val joinedGraph2: Graph[(Int, Int), Int] = graph.joinVertices(returnMessage) { (_, oldAttr, newAttr) => ((newAttr._1, r.nextInt(2)))}
 
     val anotherMessage = joinedGraph2.aggregateMessages[Int] (
       triplet => {
@@ -82,23 +82,28 @@ object main{
     )
       
  
-    val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
+    val joinedGraph3: Graph[(Int, Int), Int] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
       
     val newVertices  = testFilter(joinedGraph3).mapVertices((id,attr) => attr._1).vertices
+    (joinedGraph3).vertices.foreach(println)
     //of the form (vID, (a))
     //all we have to do is create an edge of (vID, a)
-      
+
+    val newEdges = newVertices.map(x => Edge(x._1, x._2, 1))
+    val testG = Graph.fromEdges[(Int, Int), Int](newEdges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
+    testG.vertices.foreach(println)
+    newEdges.foreach(println)
     
-    M = Graph(M.vertices ++ newM.vertices, M.edges ++ newM.edges)
+
+
     graph = filterGraph(joinedGraph3)
       
     joinedGraph3.vertices.collect
-    M.vertices.collect
+    //M.vertices.collect
     joinedGraph3.edges.collect
-    M.edges.collect
+    //M.edges.collect
       
-    remaining_edges = graph.numEdges.toLong
-      
+    remaining_edges = graph.numEdges.toLong      
    }
    return M
  }
@@ -117,9 +122,9 @@ object main{
     }
 
     val startTimeMillis = System.currentTimeMillis()
-    val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , (1L, 1L))} )
+    val edges = sc.textFile(args(0)).map(line => {val x = line.split(","); Edge(x(0).toLong, x(1).toLong , 1); })
 
-    val g = Graph.fromEdges[(Int, Int), (Long, Long)](edges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
+    val g = Graph.fromEdges[(Int, Int), Int](edges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
     
     val g_out = IsraeliItai(g)
 
@@ -129,26 +134,10 @@ object main{
     println("Runtime: " + durationSeconds + "s.")
     println("==================================")
     
-    g_out.edges.foreach(println)
-    var g2df = spark.createDataFrame(g_out.edges)
+    g_out.foreach(println)
+    var g2df = spark.createDataFrame(g_out)
     g2df = g2df.drop(g2df.columns.last)
     g2df.coalesce(1).write.format("csv").mode("overwrite").save(args(1))
     sys.exit(1)
   }
 }
-
-
-Graph(M = Graph(M.vertices ++ newM.vertices, M.edges ++ newM.edges)
-      
-      
-      
-
-      
-      
-      
-      
-      
-
-
-
-
