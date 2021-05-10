@@ -27,6 +27,12 @@ object main{
     var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1)
     return g_out
    }
+  
+   def testFilter(g_in: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
+    //filters the graph by removing all vertices and edges from vertices with that are inactive (where randNum._2 != 1)
+    var g_out = g_in.subgraph(vpred = (active, randNum) => randNum._1 != -1 && randNum._1 != 0)
+    return g_out
+   }
 
    def IsraeliItai(g: Graph[(Int, Int), (Long, Long)]): Graph[(Int, Int), (Long, Long)] = {
     val r = scala.util.Random
@@ -75,19 +81,24 @@ object main{
         }}, (a, b) => if(a > b) a else b
     )
       
-    val newEdges = M.vertices.map(v=>
-                       if(v._1 == 0 || v._2._1 == 0){(0,0)}
-                       else{(v._1, v._2._1)}
-                       )
  
     val joinedGraph3: Graph[(Int, Int), (Long, Long)] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
-       
-    M = Graph(M.vertices ++ mFilter(joinedGraph3).vertices, M.edges ++ mFilter(joinedGraph3).edges)
+      
+    val newVertices  = testFilter(joinedGraph3).mapVertices((id,attr) => attr._1).vertices
+    //of the form (vID, (a))
+    //all we have to do is create an edge of (vID, a)
+      
+    
+    M = Graph(M.vertices ++ newM.vertices, M.edges ++ newM.edges)
     graph = filterGraph(joinedGraph3)
+      
+    joinedGraph3.vertices.collect
     M.vertices.collect
-    graph.vertices.collect
+    joinedGraph3.edges.collect
+    M.edges.collect
       
     remaining_edges = graph.numEdges.toLong
+      
    }
    return M
  }
@@ -127,6 +138,16 @@ object main{
 }
 
 
+Graph(M = Graph(M.vertices ++ newM.vertices, M.edges ++ newM.edges)
+      
+      
+      
+
+      
+      
+      
+      
+      
 
 
 
