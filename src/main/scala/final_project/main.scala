@@ -34,10 +34,10 @@ object main{
     return g_out
    }
 
-   def IsraeliItai(g: Graph[(Int, Int), Int]): EdgeRDD[Int] = {
+   def IsraeliItai(g: Graph[(Int, Int), Int]): Graph[(Int, Int), Int] = {
     val r = scala.util.Random
     var remaining_edges: Long = 2L
-    var M = filterGraph(g).edges
+    var M = filterGraph(g)
     var graph = g
 
     while (remaining_edges >= 1L){
@@ -85,14 +85,13 @@ object main{
     val joinedGraph3: Graph[(Int, Int), Int] = graph.joinVertices(anotherMessage) { (_, oldAttr, newAttr) => (newAttr, newAttr)}
       
     val newVertices  = testFilter(joinedGraph3).mapVertices((id,attr) => attr._1).vertices
-    (joinedGraph3).vertices.foreach(println)
     //of the form (vID, (a))
     //all we have to do is create an edge of (vID, a)
 
     val newEdges = newVertices.map(x => Edge(x._1, x._2, 1))
     val testG = Graph.fromEdges[(Int, Int), Int](newEdges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
-    testG.vertices.foreach(println)
-    newEdges.foreach(println)
+    val testG2 = Graph(M.vertices ++ testG.vertices, M.edges ++ testG.edges)
+    M = testG2
     
 
 
@@ -127,15 +126,14 @@ object main{
     val g = Graph.fromEdges[(Int, Int), Int](edges, (0, 0), edgeStorageLevel = StorageLevel.MEMORY_AND_DISK, vertexStorageLevel = StorageLevel.MEMORY_AND_DISK)
     
     val g_out = IsraeliItai(g)
-
+//    g_out.edges.foreach(println)
     val endTimeMillis = System.currentTimeMillis()
     val durationSeconds = (endTimeMillis - startTimeMillis) / 1000
     println("==================================")
     println("Runtime: " + durationSeconds + "s.")
     println("==================================")
     
-    g_out.foreach(println)
-    var g2df = spark.createDataFrame(g_out)
+    var g2df = spark.createDataFrame(g_out.edges)
     g2df = g2df.drop(g2df.columns.last)
     g2df.coalesce(1).write.format("csv").mode("overwrite").save(args(1))
     sys.exit(1)
