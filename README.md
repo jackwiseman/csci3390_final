@@ -1,7 +1,6 @@
 # Large Scale Data Processing: Final Project
-## Graph matching
-For the final project, you are provided 6 CSV files, each containing an undirected graph, which can be found [here](https://drive.google.com/file/d/1khb-PXodUl82htpyWLMGGNrx-IzC55w8/view?usp=sharing). The files are as follows:  
-
+## Contributors: Jacob Kennedy, Nick Bearup, Jack Wiseman
+## Results
 |           File name           |        Number of edges       |           Run Time            |        Number of Matchings       |
 | ----------------------------- | ---------------------------- | ----------------------------- | -------------------------------- | 
 | com-orkut.ungraph.csv         | 117185083                    | 5528 seconds - ~92 min.       | 1,390,939 matchings              |
@@ -11,74 +10,63 @@ For the final project, you are provided 6 CSV files, each containing an undirect
 | musae_ENGB_edges.csv          | 35324                        | 24 seconds                    | 2427      matchings
 | log_normal_100.csv            | 2671                         | 19 seconds                    | 49        matchings              |
 
-Your goal is to compute a matching as large as possible for each graph. 
+## Final Report:
+We had a few main goals going into the project. Our top priority was to produce high quality matchings. With this mind, we determined that it would be appropriate to use the color coding algorithm. The following is the pseudocode:
 
-### Input format
-Each input file consists of multiple lines, where each line contains 2 numbers that denote an undirected edge. For example, the input below is a graph with 3 edges.  
-1,2  
-3,2  
-3,4  
+Color-Coding Algorithm:
 
-### Output format
-Your output should be a CSV file listing all of the matched edges, 1 on each line. For example, the ouput below is a 2-edge matching of the above input graph. Note that `3,4` and `4,3` are the same since the graph is undirected.  
-1,2  
-4,3  
+repeat 22k+1(k+1)logk iterations{
+	Each vertex color itself in red or blue with prob ½
 
-### No template is provided
-For the final project, you will need to write everything from scratch. Feel free to consult previous projects for ideas on structuring your code. That being said, you are provided a verifier that can confirm whether or not your output is a matching. As usual, you'll need to compile it with
-```
-sbt clean package
-```  
-The verifier accepts 2 file paths as arguments, the first being the path to the file containing the initial graph and the second being the path to the file containing the matching. It can be ran locally with the following command (keep in mind that your file paths may be different):
-```
-// Linux
-spark-submit --master local[*] --class final_project.verifier data/log_normal_100.csv data/log_normal_100_matching.csv
+	Let G = (V,E), where
+		V = {u | u ∈ V is free, or ∃(u,v) ∈ M s.t. (u,v) is bichromatic}
+		E = {(u,v) | (u,v) ∈ E, u, v ∈ V and (u,v) is bichromatic}
 
-// Unix
-spark-submit --master "local[*]" --class "final_project.verifier" data/log_normal_100.csv data/log_normal_100_matching.csv
-```
+	Let C be a set of maximal augmenting path of length ≤ 2k-1
+	Augment along paths in C
 
-## Deliverables
-* The output file (matching) for each test case.
-  * For naming conventions, if the input file is `XXX.csv`, please name the output file `XXX_matching.csv`.
-  * You'll need to compress the output files into a single ZIP or TAR file before pushing to GitHub. If they're still too large, you can upload the files to Google Drive and include the sharing link in your report.
-* The code you've applied to produce the matchings.
-  * You should add your source code to the same directory as `verifier.scala` and push it to your repository.
-* A project report that includes the following:
-  * A table containing the size of the matching you obtained for each test case. The sizes must correspond to the matchings in your output files.
-  * An estimate of the amount of computation used for each test case. For example, "the program runs for 15 minutes on a 2x4 N1 core CPU in GCP." If you happen to be executing mulitple algorithms on a test case, report the total running time.
-  * Description(s) of your approach(es) for obtaining the matchings. It is possible to use different approaches for different cases. Please describe each of them as well as your general strategy if you were to receive a new test case.
-  * Discussion about the advantages of your algorithm(s). For example, does it guarantee a constraint on the number of shuffling rounds (say `O(log log n)` rounds)? Does it give you an approximation guarantee on the quality of the matching? If your algorithm has such a guarantee, please provide proofs or scholarly references as to why they hold in your report.
-* A live Zoom presentation during class time on 5/4 or 5/6.
-  * Note that the presentation date is before the final project submission deadline. This means that you could still be working on the project when you present. You may present the approaches you're currently trying. You can also present a preliminary result, like the matchings you have at the moment. After your presentation, you'll be given feedback to help you complete or improve your work.
-  * If any members of your group attend class in a different time zone, you may record and submit your presentation **by midnight on 5/3**.
+This algorithm runs 22k+1(k+1)logk iterations, and each iteration uses O(k3logn) rounds. While this would not give us the perfect maximum matching, it would give us solid results. The concern was, however, given that we only had limited time for this project, we wanted some confidence that we could implement the algorithm. This particular algorithm would be rather difficult to accomplish, so we considered some other algorithms. 
 
-## Grading policy
-* Quality of matchings (40%)
-  * For each test case, you'll receive at least 70% of full credit if your matching size is at least half of the best answer in the class.
-  * **You will receive a 0 for any case where the verifier does not confirm that your output is a matching.** Please do not upload any output files that do not pass the verifier.
-* Project report (35%)
-  * Your report grade will be evaluated using the following criteria:
-    * Discussion of the merits of your algorithms
-    * Depth of technicality
-    * Novelty
-    * Completeness
-    * Readability
-* Presentation (15%)
-* Formatting (10%)
-  * If the format of your submission does not adhere to the instructions (e.g. output file naming conventions), points will be deducted in this category.
+We then considered implementing either the bidding variant of luby’s algorithm or the Israeli-Itai algorithm to get a valid maximal matching and then deal with the augmenting paths afterwards. We considered the fact that they both use O(logn) rounds and that it is unclear as to which would perform better, so we had to come up with some other criteria to determine which to implement. Ultimately, since we have implemented a variant of the bidding variant of Luby algorithm in the past, we figured it would be better to further our understanding of a different algorithm, so we decided to implement a variant of Israeli Itai algorithm. 
 
-## Submission via GitHub
-Delete your project's current **README.md** file (the one you're reading right now) and include your report as a new **README.md** file in the project root directory. Have no fear—the README with the project description is always available for reading in the template repository you created your repository from. For more information on READMEs, feel free to visit [this page](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-readmes) in the GitHub Docs. You'll be writing in [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown). Be sure that your repository is up to date and you have pushed all of your project's code. When you're ready to submit, simply provide the link to your repository in the Canvas assignment's submission.
+The following pseudocode is where we began:
 
-## You must do the following to receive full credit:
-1. Create your report in the ``README.md`` and push it to your repo.
-2. In the report, you must include your (and any partner's) full name in addition to any collaborators.
-3. Submit a link to your repo in the Canvas assignment.
+Israeli-Itai Algorithm
 
-## Late submission penalties
-Beginning with the minute after the deadline, your submission will be docked a full letter grade (10%) for every 
-day that it is late. For example, if the assignment is due at 11:59 PM EST on Friday and you submit at 3:00 AM EST on Sunday,
-then you will be docked 20% and the maximum grade you could receive on that assignment is an 80%. 
-Late penalties are calculated from the last commit in the Git log.
-**If you make a commit more than 48 hours after the deadline, you will receive a 0.**
+M = ∅
+while(there exist active vertices){
+	Every active vertex propose to a random neighbor
+
+	Every active vertex accept an arbitrary proposal, if there is any
+
+	Every active vertex randomly generate 0 or 1. A proposed edge from u to v join M if u generated 0 and v generated 1
+
+	De-active the endpoints of those who joined M
+}
+
+## Additional Advantages of Israeli-Itai Algorithm:
+Israeli-Itai algorithm was good for the task at hand because of the following: A good vertex, v, gets deleted with constant probability running through the algorithm. A good vertex is one that has at least d(v)/3 neighbors of equal or lower degrees, so each time a vertex is proposed, it will be deleted with a constant probability, ¼ the probability of its proposition. Based on Luby’s Algorithm, we know that at least half the edges are incident to ‘good' vertices, and the Israeli-Itai algorithm removes a constant fraction of edges each round in expectation. Because of this, in log(n) rounds, it is very likely that the graph will become empty.
+ 
+## Problems + Our Solution:
+It was difficult with aggregate messages to make each vertex send a message to only one neighbor at random. To solve this, we had each vertex send a message to every neighbor. The message contains both the vertex Id and the int 1. We then implemented the following merge algorithm:
+(a,x), (b,y) => select (a,x+y) with probability (a/x + y), otherwise select (b,x+y).
+
+We did this by selecting a random float between 0 and 1 and choosing (a,x+y) if the float was smaller than (a/x+y). Doing this allowed each vertex to receive one message from a neighbor at random. We then had only to send a message back to the vertex, effectively having picked the original vertex at random. 
+We had to make sure that each vertex only received the message from one neighbor during the next aggregate messages. This wasn’t difficult, but we needed to add the neighbor to M only if it was ultimately chosen by the receiving vertex. To accomplish this task, we had each vertex send its vertex ID. That way, when the neighbor selects one message to receive, it will have the corresponding vertex as its attribute. The remaining vertices would set their attribute to -1. At that point, we simply had to filter the graph so that it has only vertices with attributes != -1 and turn that vertex rdd into an edge rdd. After that, we added those edges and any new vertices to M. 
+
+## Plan for Augmenting Paths:
+We had a couple of ideas for the implementation of the final step of the project. However, upon getting valid maximal matchings, we also had some concerns about space with our code. We calculated the amount of remaining time that we had for our project, and determined that it would be prudent to focus our time on the space issue so that we would not run into problems with the larger files. 
+
+## Estimate of Amount of Computation for each Case:
+
+log_normal_100.csv - the program ran for 19 seconds on a 2x4 N1 standard core CPU in the the Google Cloud Platform (n1-standard-4)
+
+musae_ENGB_edges.csv - the program ran for 24 seconds on a 2x4 N1 high-memory core CPU in the GCP (n1-highmem-4)
+
+soc-pokec-relationships.csv - the program ran for 1491 seconds on a 2x16 N1 high-memory core CPU in the GCP (n1-highmem-16)
+
+soc-LiveJournal1.csv - the program ran for 3253 seconds on a 2x16 N1 high-memory core CPU in the GCP (n1-highmem-16)
+
+twitter_original_edges.csv - the program ran for 2408 seconds on a 2x16 N1 high-memory core CPU in the GCP (n1-highmem-16)
+
+com-orkut.ungraph.csv - the program ran for 5528 seconds on a 2x32 N1 high-memory core CPU in the GCP (n1-highmem-32)
