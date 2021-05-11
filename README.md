@@ -8,7 +8,7 @@ For the final project, you are provided 6 CSV files, each containing an undirect
 | twitter_original_edges.csv    | 63555749                     | 2408 seconds - ~40 min.       | 94,074    matchings              |
 | soc-LiveJournal1.csv          | 42851237                     | 3253 seconds - ~52 min.       | 1,712,331 matchings              |
 | soc-pokec-relationships.csv   | 22301964                     | 1491 seconds - ~24 min.       | 649091    matchings              |
-| musae_ENGB_edges.csv          | 35324                        |
+| musae_ENGB_edges.csv          | 35324                        | 24 seconds                    | 2427      matchings
 | log_normal_100.csv            | 2671                         | 19 seconds                    | 49        matchings              |
 
 Your goal is to compute a matching as large as possible for each graph. 
