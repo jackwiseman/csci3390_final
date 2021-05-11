@@ -2,15 +2,14 @@
 ## Graph matching
 For the final project, you are provided 6 CSV files, each containing an undirected graph, which can be found [here](https://drive.google.com/file/d/1khb-PXodUl82htpyWLMGGNrx-IzC55w8/view?usp=sharing). The files are as follows:  
 
-|           File name           |        Number of edges       ||           Run Time            |        Number of Matchings       |
-| ------------------------------| ---------------------------- || ------------------------------| -------------------------------- | 
-| com-orkut.ungraph.csv         | 117185083                    || 5528 seconds - ~92 min.       | 1,390,939 matchings              |
-| twitter_original_edges.csv    | 63555749                     || 2408 seconds - ~40 min.       | 94,074    matchings              |
-| soc-LiveJournal1.csv          | 42851237                     || 3253 seconds - ~52 min.       | 1,712,331 matchings              |
-| soc-pokec-relationships.csv   | 22301964                     || 1491 seconds - ~24 min.       | 649091    matchings              |
-| musae_ENGB_edges.csv          | 35324                        ||
-| log_normal_100.csv            | 2671                         || 19 seconds                    | 49        matchings              |
-| ------------------------------| ---------------------------- || ----------------------------- | -------------------------------- |
+|           File name           |        Number of edges       |           Run Time            |        Number of Matchings       |
+| ----------------------------- | ---------------------------- | ----------------------------- | -------------------------------- | 
+| com-orkut.ungraph.csv         | 117185083                    | 5528 seconds - ~92 min.       | 1,390,939 matchings              |
+| twitter_original_edges.csv    | 63555749                     | 2408 seconds - ~40 min.       | 94,074    matchings              |
+| soc-LiveJournal1.csv          | 42851237                     | 3253 seconds - ~52 min.       | 1,712,331 matchings              |
+| soc-pokec-relationships.csv   | 22301964                     | 1491 seconds - ~24 min.       | 649091    matchings              |
+| musae_ENGB_edges.csv          | 35324                        |
+| log_normal_100.csv            | 2671                         | 19 seconds                    | 49        matchings              |
 
 Your goal is to compute a matching as large as possible for each graph. 
 
